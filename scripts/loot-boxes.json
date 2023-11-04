@@ -1,0 +1,15 @@
+{
+    "loot-tables":{
+        "loot-boxes":[
+            {
+                "maxAmount":1,
+                "itemName": "ITPO_PERM_DEF"
+            },
+            {
+                "minAmount":100,
+                "maxAmount":500,
+                "itemName": "ITMI_GOLD"
+            }
+        ]
+    }
+}

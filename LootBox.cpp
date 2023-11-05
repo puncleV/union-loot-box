@@ -2,6 +2,9 @@
 // Union SOURCE file
 #include <vector>
 namespace GOTHIC_ENGINE {
+	auto lbIterations = 0;
+	auto lastAddedItem = Z "none";
+
 	bool IsItemSymbol(zCPar_Symbol* symbol) {
 		if (symbol->type != zPAR_TYPE_INSTANCE) {
 			return false;
@@ -22,19 +25,20 @@ namespace GOTHIC_ENGINE {
 		return true;
 	}
 		
-	std::vector<zSTRING> getItemsList() {
-		std::vector<zSTRING> weapons_list;
+	zSTRING getRandomItemName() {
+		zSTRING itemName = "ITMI_GOLD";
 
 		auto c_item = parser->GetIndex(oCItem::classDef->scriptClassName);
+
 		if (c_item == -1) {
-			return weapons_list;
+			return itemName;
 		}
 
-		int itemsCreated = 0;
-		for (int i = 0; i < parser->symtab.GetNumInList(); i++) {
-			zCPar_Symbol* symbol = parser->symtab.table[i];
+		for (int i = 0; i < 228; i++) { 
+			auto symTableIndex = randomizer.Random(0, parser->symtab.GetNumInList());
+			zCPar_Symbol* symbol = parser->symtab.table[symTableIndex];
 
-			if (i == parser->instance_help) {
+			if (symTableIndex == parser->instance_help) {
 				continue;
 			}
 
@@ -42,19 +46,23 @@ namespace GOTHIC_ENGINE {
 				continue;
 			}
 
-			oCItem* item = static_cast<oCItem*>(ogame->GetGameWorld()->CreateVob(zVOB_TYPE_ITEM, i));
+			oCItem* item = static_cast<oCItem*>(ogame->GetGameWorld()->CreateVob(zVOB_TYPE_ITEM, symTableIndex));
 
 			if (item == nullptr || IsIgnoredOrTestItem(item)) {
 				continue;
 			}
 
 
-			weapons_list.push_back(item->GetObjectName());
+			itemName = item->GetObjectName();
 
 			item->Release();
+			lbIterations = i;
+			break;
 		}
+		
+		lastAddedItem = itemName;
 
-		return weapons_list;
+		return itemName;
 	}
 
 	int openLootBox() {
@@ -68,7 +76,7 @@ namespace GOTHIC_ENGINE {
 			lootToAdd = randomizer.getRandomArrayElement(lootBoxLoot);
 		}
 		else {
-			lootToAdd = Loot(randomizer.getRandomArrayElement(getItemsList()), randomizer.Random(1, 3), randomizer.Random(1, 5));
+			lootToAdd = Loot(getRandomItemName(), randomizer.Random(1, 3), randomizer.Random(1, 10));
 		}
 
 		lootToAdd.addToNpc(player);
